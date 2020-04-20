@@ -2,6 +2,7 @@ package edu.ilin.watchdog.service.impl;
 
 import edu.ilin.watchdog.exception.InternalException;
 import edu.ilin.watchdog.service.StorageService;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -60,5 +62,17 @@ public class StorageServiceImpl implements StorageService {
         }
 
         return filename;
+    }
+
+    @Override
+    public String store(File file, byte[] bytes) {
+        try {
+            FileUtils.writeByteArrayToFile(file, bytes);
+        } catch (IOException e) {
+            throw new InternalException("SWW with file uploading",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return file.getName();
     }
 }

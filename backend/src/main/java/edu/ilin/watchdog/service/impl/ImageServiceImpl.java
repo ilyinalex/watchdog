@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ImageServiceImpl implements ImageService {
@@ -47,7 +49,10 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void populateSamplesDir() {
-        throw new NotImplementedException();
+        List<Image> images = imageRepository.findAll().stream()
+                .filter(image -> image.getUser() != null)
+                .collect(Collectors.toList());
+
     }
 
     @Override
