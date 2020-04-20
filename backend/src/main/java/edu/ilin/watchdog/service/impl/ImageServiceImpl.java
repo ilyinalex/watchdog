@@ -23,6 +23,7 @@
  */
 package edu.ilin.watchdog.service.impl;
 
+import edu.ilin.watchdog.model.Image;
 import edu.ilin.watchdog.repository.ImageRepository;
 import edu.ilin.watchdog.service.ImageService;
 import edu.ilin.watchdog.service.StorageService;
@@ -52,5 +53,10 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public File getSamplesRoot() {
         return new File(storageService.getSamplesDir());
+    }
+
+    @Override
+    public Image save(Image image) {
+        return imageRepository.save(image);
     }
 }

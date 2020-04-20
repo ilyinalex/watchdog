@@ -2,6 +2,7 @@ package edu.ilin.watchdog.controller;
 
 import edu.ilin.watchdog.dto.UploadFileResponse;
 import edu.ilin.watchdog.service.FaceRecognizeService;
+import edu.ilin.watchdog.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
