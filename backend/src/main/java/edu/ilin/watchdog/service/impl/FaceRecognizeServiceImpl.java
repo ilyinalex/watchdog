@@ -8,6 +8,8 @@ import edu.ilin.watchdog.repository.UserRepository;
 import edu.ilin.watchdog.service.FaceRecognizeService;
 import edu.ilin.watchdog.service.ImageService;
 import edu.ilin.watchdog.service.StorageService;
+import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_face.FaceRecognizer;
@@ -89,7 +91,14 @@ public class FaceRecognizeServiceImpl implements FaceRecognizeService {
     }
 
     private String getPredictedLabel(String imageName) {
-        throw new NotImplementedException();
+        Mat image = imread(imageName, IMREAD_GRAYSCALE);
+
+        IntPointer label = new IntPointer(1);
+        DoublePointer confidence = new DoublePointer(1);
+        faceRecognizer.predict(image, label, confidence);
+        int predictedLabel = label.get(0);
+
+        return String.valueOf(predictedLabel);
     }
 
 
