@@ -1,5 +1,8 @@
 package edu.ilin.watchdog.dto;
 
-public class UploadFileResponse {
+import lombok.Data;
 
+@Data
+public class UploadFileResponse {
+    private String message;
 }

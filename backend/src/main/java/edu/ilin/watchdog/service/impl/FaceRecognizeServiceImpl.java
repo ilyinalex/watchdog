@@ -62,6 +62,10 @@ public class FaceRecognizeServiceImpl implements FaceRecognizeService {
 
         File[] imageFiles = root.listFiles(imgFilter);
 
+        if (imageFiles == null || imageFiles.length == 0) {
+            return;
+        }
+
         MatVector images = new MatVector(imageFiles.length);
 
         Mat labels = new Mat(imageFiles.length, 1, CV_32SC1);
@@ -82,7 +86,7 @@ public class FaceRecognizeServiceImpl implements FaceRecognizeService {
             } catch (Exception e) {
                 labelsBuf.put(counter, -1);
             }
-            System.out.println(image.getName() + " " + label);
+//            System.out.println(image.getName() + " " + label);
 
             counter++;
         }
@@ -91,6 +95,9 @@ public class FaceRecognizeServiceImpl implements FaceRecognizeService {
     }
 
     private String getPredictedLabel(String imageName) {
+        if (faceRecognizer.empty()) {
+            return null;
+        }
         Mat image = imread(imageName, IMREAD_GRAYSCALE);
 
         IntPointer label = new IntPointer(1);
@@ -108,21 +115,21 @@ public class FaceRecognizeServiceImpl implements FaceRecognizeService {
 
         String predictedLabel = getPredictedLabel(imageName);
 
-        if (StringUtils.isEmpty(predictedLabel)) {
-            throw new InternalException("predicted label is null", HttpStatus.INTERNAL_SERVER_ERROR);
+        Optional<User> userOpt = Optional.empty();
+
+        if (!StringUtils.isEmpty(predictedLabel)) {
+            userOpt = userRepository.findById(Long.parseLong(predictedLabel));
         }
-        Optional<User> userOpt = userRepository.findById(Long.parseLong(predictedLabel));
 
         Image imageObj = new Image();
 
         try {
-            imageObj.setName(imageName);
+            imageObj.setName(image.getOriginalFilename());
             imageObj.setData(image.getBytes());
             imageObj.setCreatedAt(new Date());
+            imageObj.setUpdatedAt(new Date());
 
-            if (!userOpt.isPresent()) {
-                imageObj.setUser(userOpt.get());
-            }
+            userOpt.ifPresent(imageObj::setUser);
 
             imageService.save(imageObj);
         }

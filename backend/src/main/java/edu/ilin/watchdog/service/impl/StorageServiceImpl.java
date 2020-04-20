@@ -5,14 +5,15 @@ import edu.ilin.watchdog.service.StorageService;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletContext;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -21,15 +22,29 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 @Service
+@PropertySource("classpath:storage.properties")
 public class StorageServiceImpl implements StorageService {
     @Value("${training_dir}")
     private String trainingDir;
 
-    private final Path samplesDir;
+    private Path samplesDir;
+
+    private ServletContext context;
 
     @Autowired
-    public StorageServiceImpl() {
-        this.samplesDir = Paths.get(trainingDir);
+    public StorageServiceImpl(ServletContext context) {
+        this.context = context;
+    }
+
+    @PostConstruct
+    private void postConstruct() {
+        this.samplesDir = Paths.get(context.getRealPath(trainingDir));
+        try {
+            Files.createDirectories(this.samplesDir);
+        } catch (IOException e) {
+            //TODO another EH
+            throw new InternalException("Internal error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
@@ -61,7 +76,7 @@ public class StorageServiceImpl implements StorageService {
             throw new InternalException("Failed to store file " + filename, e);
         }
 
-        return filename;
+        return this.samplesDir.resolve(filename).toString();
     }
 
     @Override
