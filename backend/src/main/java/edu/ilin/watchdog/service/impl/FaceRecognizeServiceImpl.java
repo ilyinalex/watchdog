@@ -24,9 +24,6 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 @Service
 public class FaceRecognizeServiceImpl implements FaceRecognizeService {
 
-    @Value("${training_dir}")
-    private String trainingDir;
-
     private FaceRecognizer faceRecognizer = FisherFaceRecognizer.create();
 
     private ImageService imageService;
@@ -36,11 +33,10 @@ public class FaceRecognizeServiceImpl implements FaceRecognizeService {
         this.imageService = imageService;
         imageService.populateSamplesDir();
 
-        train();
+        train(imageService.getSamplesRoot());
     }
 
-    private void train() {
-        File root = new File(trainingDir);
+    private void train(File root) {
 
         FilenameFilter imgFilter = new FilenameFilter() {
             public boolean accept(File dir, String name) {

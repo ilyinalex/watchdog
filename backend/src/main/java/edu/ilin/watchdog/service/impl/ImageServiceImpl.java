@@ -30,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.File;
+
 @Service
 public class ImageServiceImpl implements ImageService {
 
@@ -45,5 +47,10 @@ public class ImageServiceImpl implements ImageService {
     @Override
     public void populateSamplesDir() {
         throw new NotImplementedException();
+    }
+
+    @Override
+    public File getSamplesRoot() {
+        return new File(storageService.getSamplesDir());
     }
 }
