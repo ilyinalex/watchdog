@@ -1,5 +1,6 @@
 package edu.ilin.watchdog.service.impl;
 
+import edu.ilin.watchdog.dto.UploadFileResponse;
 import edu.ilin.watchdog.service.FaceRecognizeService;
 import edu.ilin.watchdog.service.ImageService;
 import org.bytedeco.javacpp.DoublePointer;
@@ -11,6 +12,7 @@ import org.bytedeco.opencv.opencv_face.FisherFaceRecognizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
@@ -73,5 +75,10 @@ public class FaceRecognizeServiceImpl implements FaceRecognizeService {
         }
 
         faceRecognizer.train(images, labels);
+    }
+
+    @Override
+    public UploadFileResponse process(MultipartFile image) {
+        throw new NotImplementedException();
     }
 }
