@@ -23,17 +23,16 @@
  */
 package edu.ilin.watchdog.service.impl;
 
+import edu.ilin.watchdog.exception.InternalException;
 import edu.ilin.watchdog.model.Image;
 import edu.ilin.watchdog.repository.ImageRepository;
 import edu.ilin.watchdog.service.ImageService;
 import edu.ilin.watchdog.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ImageServiceImpl implements ImageService {
@@ -49,9 +48,16 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public void populateSamplesDir() {
-        List<Image> images = imageRepository.findAll().stream()
-                .filter(image -> image.getUser() != null)
-                .collect(Collectors.toList());
+        imageRepository.findAll().forEach(image -> {
+            if (image.getUser() != null) {
+                try {
+                    storageService.store(image.getId() + "." +
+                            image.getName().split("\\.")[1], image.getData());
+                } catch (Exception e) {
+                    throw new InternalException("SWW", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+            }
+        });
 
     }
 

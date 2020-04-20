@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,7 +50,7 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public String getSamplesDir() {
-        return trainingDir;
+        return context.getRealPath(trainingDir);
     }
 
     @Override
@@ -80,14 +81,14 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public String store(File file, byte[] bytes) {
-        try {
-            FileUtils.writeByteArrayToFile(file, bytes);
+    public String store(String fileName, byte[] bytes) {
+        try (InputStream inputStream = new ByteArrayInputStream(bytes)) {
+            Files.copy(inputStream, this.samplesDir.resolve(fileName),
+                    StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new InternalException("SWW with file uploading",
-                    HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalException("Failed to store file " + fileName, e);
         }
 
-        return file.getName();
+        return fileName;
     }
 }

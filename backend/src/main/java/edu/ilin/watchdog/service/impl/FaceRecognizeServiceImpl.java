@@ -4,10 +4,12 @@ import edu.ilin.watchdog.dto.UploadFileResponse;
 import edu.ilin.watchdog.exception.InternalException;
 import edu.ilin.watchdog.model.Image;
 import edu.ilin.watchdog.model.User;
+import edu.ilin.watchdog.repository.ImageRepository;
 import edu.ilin.watchdog.repository.UserRepository;
 import edu.ilin.watchdog.service.FaceRecognizeService;
 import edu.ilin.watchdog.service.ImageService;
 import edu.ilin.watchdog.service.StorageService;
+import edu.ilin.watchdog.utils.ImageUtils;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -19,13 +21,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.IntBuffer;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.Optional;
 
@@ -42,12 +42,15 @@ public class FaceRecognizeServiceImpl implements FaceRecognizeService {
     private StorageService storageService;
 
     private UserRepository userRepository;
+    private ImageRepository imageRepository;
+
 
     @Autowired
-    public FaceRecognizeServiceImpl(ImageService imageService, StorageServiceImpl storageService, StorageService storageService1, UserRepository userRepository) {
+    public FaceRecognizeServiceImpl(ImageService imageService, StorageServiceImpl storageService, StorageService storageService1, UserRepository userRepository, ImageRepository imageRepository, ImageUtils imageUtils) {
         this.imageService = imageService;
         this.storageService = storageService1;
         this.userRepository = userRepository;
+        this.imageRepository = imageRepository;
         imageService.populateSamplesDir();
 
         train(imageService.getSamplesRoot());
@@ -118,7 +121,12 @@ public class FaceRecognizeServiceImpl implements FaceRecognizeService {
         Optional<User> userOpt = Optional.empty();
 
         if (!StringUtils.isEmpty(predictedLabel)) {
-            userOpt = userRepository.findById(Long.parseLong(predictedLabel));
+
+            //TODO hell - need to decompose
+            userOpt = userRepository.findById(
+                    imageRepository.findById(Long.parseLong(predictedLabel))
+                            .orElseThrow(() -> new InternalException("Image with id " + predictedLabel + "not found",
+                                    HttpStatus.INTERNAL_SERVER_ERROR)).getUser().getId());
         }
 
         Image imageObj = new Image();

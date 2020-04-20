@@ -9,5 +9,5 @@ public interface StorageService {
 
     String store(MultipartFile file);
 
-    String store(File file, byte[] bytes);
+    String store(String fileName, byte[] bytes);
 }
